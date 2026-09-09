@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, 
@@ -8,7 +8,6 @@ import {
   Code2, 
   Film, 
   Calendar, 
-  Sliders, 
   Sparkles, 
   Copy, 
   Check, 
@@ -25,19 +24,19 @@ interface ProjectFullscreenModalProps {
   projects: ProjectItem[];
   onClose: () => void;
   onSelectProject: (project: ProjectItem) => void;
-  onOpenStudio?: (imageUrl: string) => void;
 }
 
 export default function ProjectFullscreenModal({
   project,
   projects,
   onClose,
-  onSelectProject,
-  onOpenStudio
+  onSelectProject
 }: ProjectFullscreenModalProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [copied, setCopied] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
 
   // Reset image index when project changes
   useEffect(() => {
@@ -216,14 +215,43 @@ export default function ProjectFullscreenModal({
 
           {/* Scrollable Modal Body */}
           <div className="overflow-y-auto flex-1 p-4 sm:p-6 space-y-6">
-            {/* Cinematic Media Stage */}
-            <div className="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 select-none group">
+            {/* Cinematic Media Stage with Touch Swipe & Uniform Radius */}
+            <div 
+              className="relative rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 select-none group min-h-[280px] sm:min-h-[440px] max-h-[65vh] flex items-center justify-center"
+              onTouchStart={(e) => {
+                touchStartXRef.current = e.touches[0].clientX;
+                touchStartYRef.current = e.touches[0].clientY;
+              }}
+              onTouchEnd={(e) => {
+                if (touchStartXRef.current === null || touchStartYRef.current === null) return;
+                const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+                const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
+                if (Math.abs(deltaX) > 35 && Math.abs(deltaX) > Math.abs(deltaY) && images.length > 1) {
+                  if (deltaX < 0) {
+                    // Swipe Left -> Next
+                    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+                  } else {
+                    // Swipe Right -> Prev
+                    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+                  }
+                }
+                touchStartXRef.current = null;
+                touchStartYRef.current = null;
+              }}
+            >
               {images.length > 0 ? (
-                <div className="relative w-full flex items-center justify-center min-h-[260px] sm:min-h-[420px] max-h-[550px] bg-slate-950">
+                <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
+                  {/* Ambient Blurred Background (Ensures uniform presentation regardless of image size/ratio) */}
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center filter blur-3xl opacity-30 scale-110 pointer-events-none transition-all duration-500"
+                    style={{ backgroundImage: `url(${activeImage})` }}
+                  />
+
+                  {/* Main Image with strict rounded-xl border radius and contain fitting */}
                   <img
                     src={activeImage}
                     alt={project.title}
-                    className={`w-full max-h-[550px] object-contain transition-transform duration-300 ${
+                    className={`relative z-10 max-w-full max-h-[58vh] object-contain rounded-xl shadow-2xl transition-transform duration-300 ${
                       isZoomed ? 'scale-125 cursor-zoom-out' : 'cursor-zoom-in'
                     }`}
                     onClick={() => setIsZoomed(!isZoomed)}
@@ -238,7 +266,7 @@ export default function ProjectFullscreenModal({
                           e.stopPropagation();
                           setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
                         }}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md transition-all shadow-md"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md transition-all shadow-md z-20 cursor-pointer"
                         aria-label="Previous image"
                       >
                         <ChevronLeft className="w-5 h-5" />
@@ -250,7 +278,7 @@ export default function ProjectFullscreenModal({
                           e.stopPropagation();
                           setCurrentImageIndex((prev) => (prev + 1) % images.length);
                         }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md transition-all shadow-md"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md transition-all shadow-md z-20 cursor-pointer"
                         aria-label="Next image"
                       >
                         <ChevronRight className="w-5 h-5" />
@@ -258,12 +286,12 @@ export default function ProjectFullscreenModal({
                     </>
                   )}
 
-                  {/* Zoom indicator / Fullscreen toggle button */}
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                  {/* Zoom indicator */}
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5 z-20">
                     <button
                       type="button"
                       onClick={() => setIsZoomed(!isZoomed)}
-                      className="p-2 rounded-xl bg-black/60 hover:bg-black/80 text-white backdrop-blur-md text-xs font-semibold flex items-center gap-1 transition-colors"
+                      className="p-2 rounded-xl bg-black/60 hover:bg-black/80 text-white backdrop-blur-md text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                       title={isZoomed ? 'Zoom out' : 'Zoom in'}
                     >
                       <Maximize2 className="w-3.5 h-3.5" />
@@ -271,10 +299,11 @@ export default function ProjectFullscreenModal({
                     </button>
                   </div>
 
-                  {/* Image counter indicator */}
+                  {/* Image counter indicator & Swipe Hint */}
                   {images.length > 1 && (
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-xs font-semibold">
-                      {currentImageIndex + 1} / {images.length}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-xs font-semibold z-20 flex items-center gap-2">
+                      <span>{currentImageIndex + 1} / {images.length}</span>
+                      <span className="text-[10px] text-slate-300 border-l border-white/20 pl-2 sm:hidden">Swipe ↔</span>
                     </div>
                   )}
                 </div>
@@ -286,7 +315,7 @@ export default function ProjectFullscreenModal({
               )}
             </div>
 
-            {/* Thumbnail Strip (if multiple images) */}
+            {/* Thumbnail Strip (if multiple images) with uniform rounded-xl radius */}
             {images.length > 1 && (
               <div className="flex items-center gap-2 overflow-x-auto pb-1 select-none">
                 {images.map((img, idx) => (
@@ -294,13 +323,13 @@ export default function ProjectFullscreenModal({
                     key={idx}
                     type="button"
                     onClick={() => setCurrentImageIndex(idx)}
-                    className={`relative w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${
+                    className={`relative w-20 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
                       idx === currentImageIndex
                         ? 'border-sky-500 shadow-md scale-102'
                         : 'border-slate-200 opacity-60 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover rounded-lg" />
                   </button>
                 ))}
               </div>
@@ -325,18 +354,6 @@ export default function ProjectFullscreenModal({
 
                 {/* Primary Action Buttons */}
                 <div className="flex items-center gap-2 shrink-0">
-                  {onOpenStudio && activeImage && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenStudio(activeImage)}
-                      className="px-3.5 py-2 rounded-xl text-xs font-bold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
-                      title="Open in Creative Edit Studio"
-                    >
-                      <Sliders className="w-4 h-4" />
-                      <span>Grade in Studio</span>
-                    </button>
-                  )}
-
                   {project.link && project.link !== '#' ? (
                     <motion.a
                       href={project.link}

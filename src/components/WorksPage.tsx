@@ -1,4 +1,4 @@
-import { useState, useEffect, type MouseEvent } from 'react';
+import { useState, useEffect, useRef, type TouchEvent, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Code2, 
@@ -10,16 +10,155 @@ import {
   Calendar, 
   Sparkles, 
   Search, 
-  Sliders,
   Maximize2,
   Share2,
-  Check,
-  Link2
+  Check
 } from 'lucide-react';
 import { ProjectCategory, ProjectItem } from '../types';
-import ImageAdjustModal from './ImageAdjustModal';
 import ProjectFullscreenModal from './ProjectFullscreenModal';
-import { shareProjectCard, getCardShareUrl } from '../utils/share';
+import { shareProjectCard } from '../utils/share';
+
+interface CardSwipeCarouselProps {
+  images: string[];
+  title: string;
+  isWebCategory: boolean;
+  onOpenCard: () => void;
+}
+
+function CardSwipeCarousel({ images, title, isWebCategory, onOpenCard }: CardSwipeCarouselProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const didSwipeRef = useRef(false);
+
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    didSwipeRef.current = false;
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.touches[0].clientX - touchStartX.current;
+    const deltaY = e.touches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      didSwipeRef.current = true;
+    }
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+
+    if (Math.abs(deltaX) > 30 && Math.abs(deltaX) > Math.abs(deltaY) && images.length > 1) {
+      didSwipeRef.current = true;
+      if (deltaX < 0) {
+        // Swipe Left -> Next
+        setCurrentIndex((prev) => (prev + 1) % images.length);
+      } else {
+        // Swipe Right -> Prev
+        setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    setTimeout(() => {
+      didSwipeRef.current = false;
+    }, 150);
+  };
+
+  const handleContainerClick = (e: MouseEvent) => {
+    if (didSwipeRef.current) {
+      e.stopPropagation();
+      return;
+    }
+    onOpenCard();
+  };
+
+  if (!images || images.length === 0) {
+    return (
+      <div 
+        onClick={onOpenCard}
+        className="relative aspect-[16/10] sm:aspect-video w-full bg-slate-100 flex flex-col items-center justify-center text-slate-400 rounded-t-2xl overflow-hidden cursor-pointer"
+      >
+        {isWebCategory ? <Code2 className="w-8 h-8 mb-1.5 text-slate-300" /> : <Film className="w-8 h-8 mb-1.5 text-slate-300" />}
+        <span className="text-[11px] font-medium">No Image Provided</span>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className="relative aspect-[16/10] sm:aspect-video w-full bg-slate-900/5 overflow-hidden rounded-t-2xl select-none group/media cursor-pointer"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onClick={handleContainerClick}
+    >
+      {/* Horizontal Sliding Track for Swipe */}
+      <div
+        className="flex h-full w-full transition-transform duration-300 ease-out"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+      >
+        {images.map((img, idx) => (
+          <div key={idx} className="min-w-full h-full relative overflow-hidden bg-slate-100 shrink-0">
+            <img
+              src={img}
+              alt={`${title} - frame ${idx + 1}`}
+              className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+              loading="lazy"
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Swipe and Navigation Controls if multiple images */}
+      {images.length > 1 && (
+        <>
+          {/* Desktop Hover Arrows */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+            }}
+            className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md opacity-0 group-hover/media:opacity-100 transition-opacity z-10 cursor-pointer shadow-md"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setCurrentIndex((prev) => (prev + 1) % images.length);
+            }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md opacity-0 group-hover/media:opacity-100 transition-opacity z-10 cursor-pointer shadow-md"
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+
+          {/* Dots Indicator & Swipe Hint */}
+          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/65 backdrop-blur-md z-10 pointer-events-none">
+            {images.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === currentIndex ? 'w-3.5 bg-sky-400' : 'w-1.5 bg-white/50'
+                }`}
+              />
+            ))}
+            <span className="text-[9px] text-white/70 font-semibold pl-1 sm:hidden">Swipe</span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 interface WorksPageProps {
   projects: ProjectItem[];
@@ -28,11 +167,8 @@ interface WorksPageProps {
 export default function WorksPage({ projects }: WorksPageProps) {
   const [activeCategory, setActiveCategory] = useState<'all' | ProjectCategory>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [imageIndices, setImageIndices] = useState<Record<string, number>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFullscreenProject, setSelectedFullscreenProject] = useState<ProjectItem | null>(null);
-  const [isStudioOpen, setIsStudioOpen] = useState(false);
-  const [studioInitialImage, setStudioInitialImage] = useState<string>('https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=1200&auto=format&fit=crop&q=80');
   const [copiedCardId, setCopiedCardId] = useState<string | null>(null);
   const [toastNotification, setToastNotification] = useState<string | null>(null);
 
@@ -101,22 +237,6 @@ export default function WorksPage({ projects }: WorksPageProps) {
 
   const webCount = projects.filter((p) => p.category === 'web').length;
   const editCount = projects.filter((p) => p.category === 'edit').length;
-
-  const handlePrevImage = (projectId: string, max: number, e: MouseEvent) => {
-    e.stopPropagation();
-    setImageIndices((prev) => {
-      const current = prev[projectId] || 0;
-      return { ...prev, [projectId]: (current - 1 + max) % max };
-    });
-  };
-
-  const handleNextImage = (projectId: string, max: number, e: MouseEvent) => {
-    e.stopPropagation();
-    setImageIndices((prev) => {
-      const current = prev[projectId] || 0;
-      return { ...prev, [projectId]: (current + 1) % max };
-    });
-  };
 
   return (
     <div id="works-page-root" className="min-h-screen pt-24 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-slate-900">
@@ -193,9 +313,9 @@ export default function WorksPage({ projects }: WorksPageProps) {
           </button>
         </div>
 
-        {/* Search Field & Launch Live Edit Studio Button */}
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-64">
+        {/* Search Field */}
+        <div className="w-full sm:w-72">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input
               id="input-search-works"
@@ -206,21 +326,6 @@ export default function WorksPage({ projects }: WorksPageProps) {
               className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-800 placeholder-slate-400 text-xs focus:outline-none focus:border-sky-500 shadow-xs transition-colors"
             />
           </div>
-
-          <button
-            id="btn-launch-edit-studio"
-            type="button"
-            onClick={() => {
-              const firstEditImg = projects.find((p) => p.category === 'edit')?.images?.[0];
-              if (firstEditImg) setStudioInitialImage(firstEditImg);
-              setIsStudioOpen(true);
-            }}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white flex items-center gap-1.5 shadow-sm transition-all whitespace-nowrap cursor-pointer shrink-0"
-            title="Open Sarathi's Live Edit Studio (Photo & Video Grading App)"
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>Live Edit Studio</span>
-          </button>
         </div>
       </div>
 
@@ -245,7 +350,7 @@ export default function WorksPage({ projects }: WorksPageProps) {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
+              className="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Clear Search
             </button>
@@ -256,8 +361,6 @@ export default function WorksPage({ projects }: WorksPageProps) {
           {filteredProjects.map((project, index) => {
             const isWebCategory = project.category === 'web';
             const images = project.images && project.images.length > 0 ? project.images : [];
-            const currentImgIdx = imageIndices[project.id] || 0;
-            const activeImage = images[currentImgIdx];
 
             return (
               <motion.article
@@ -266,62 +369,19 @@ export default function WorksPage({ projects }: WorksPageProps) {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: index * 0.04 }}
-                onClick={() => setSelectedFullscreenProject(project)}
-                className="group relative flex flex-col rounded-2xl bg-white border border-slate-200/90 hover:border-sky-300 shadow-xs hover:shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer select-none"
+                className="group relative flex flex-col rounded-2xl bg-white border border-slate-200/90 hover:border-sky-300 shadow-xs hover:shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 select-none"
               >
-                {/* Media Header / Image Carousel */}
-                <div className="relative aspect-video w-full bg-slate-100 overflow-hidden select-none border-b border-slate-100">
-                  {images.length > 0 ? (
-                    <>
-                      <img
-                        src={activeImage}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-
-                      {/* Image navigation controls if multiple images exist */}
-                      {images.length > 1 && (
-                        <>
-                          <button
-                            id={`btn-prev-img-${project.id}`}
-                            onClick={(e) => handlePrevImage(project.id, images.length, e)}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                            aria-label="Previous image"
-                          >
-                            <ChevronLeft className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            id={`btn-next-img-${project.id}`}
-                            onClick={(e) => handleNextImage(project.id, images.length, e)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                            aria-label="Next image"
-                          >
-                            <ChevronRight className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Dots counter */}
-                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md z-10">
-                            {images.map((_, i) => (
-                              <div
-                                key={i}
-                                className={`h-1.5 rounded-full transition-all ${
-                                  i === currentImgIdx ? 'w-3 bg-sky-400' : 'w-1.5 bg-white/60'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-slate-50 text-slate-400">
-                      {isWebCategory ? <Code2 className="w-8 h-8 mb-1.5 text-slate-300" /> : <Film className="w-8 h-8 mb-1.5 text-slate-300" />}
-                      <span className="text-[11px] font-medium">No Image Provided</span>
-                    </div>
-                  )}
+                {/* Media Header with Swipe Carousel & Uniform Radius */}
+                <div className="relative w-full overflow-hidden rounded-t-2xl select-none border-b border-slate-100">
+                  <CardSwipeCarousel
+                    images={images}
+                    title={project.title}
+                    isWebCategory={isWebCategory}
+                    onOpenCard={() => setSelectedFullscreenProject(project)}
+                  />
 
                   {/* Category Pill Tag */}
-                  <div className="absolute top-2.5 left-2.5 z-10">
+                  <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
                     <span
                       className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-xs ${
                         isWebCategory
@@ -334,10 +394,10 @@ export default function WorksPage({ projects }: WorksPageProps) {
                     </span>
                   </div>
 
-                  {/* Top Right Badges: Featured + Share + Expand fullscreen cue */}
+                  {/* Top Right Badges: Featured + Share + Fullscreen Indicator */}
                   <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
                     {project.featured && (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-xs">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-xs pointer-events-none">
                         <Sparkles className="w-2.5 h-2.5" />
                         <span>Featured</span>
                       </span>
@@ -356,15 +416,22 @@ export default function WorksPage({ projects }: WorksPageProps) {
                       )}
                     </button>
 
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white text-[10px] font-semibold backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity shadow-xs">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFullscreenProject(project)}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white text-[10px] font-semibold backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity shadow-xs cursor-pointer"
+                    >
                       <Maximize2 className="w-2.5 h-2.5" />
                       <span>Fullscreen</span>
-                    </span>
+                    </button>
                   </div>
                 </div>
 
                 {/* Card Content */}
-                <div className="p-4 flex flex-col flex-1">
+                <div 
+                  className="p-4 flex flex-col flex-1 cursor-pointer"
+                  onClick={() => setSelectedFullscreenProject(project)}
+                >
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <h3 className="text-base font-bold text-slate-900 font-heading group-hover:text-sky-600 transition-colors line-clamp-1">
                       {project.title}
@@ -389,7 +456,7 @@ export default function WorksPage({ projects }: WorksPageProps) {
                     </div>
                   )}
 
-                  {/* Bottom Actions: Link button (Compact, sleek) */}
+                  {/* Bottom Actions: Link button (Clean, without admin studio) */}
                   <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
                     <span className="text-[10px] text-slate-400 flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
@@ -417,22 +484,6 @@ export default function WorksPage({ projects }: WorksPageProps) {
                         )}
                       </button>
 
-                      {!isWebCategory && project.images?.[0] && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setStudioInitialImage(project.images[0]);
-                            setIsStudioOpen(true);
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 transition-colors flex items-center gap-1 cursor-pointer"
-                          title="Open this frame in the Creative Edit Studio"
-                        >
-                          <Sliders className="w-3 h-3" />
-                          <span>Grade Still</span>
-                        </button>
-                      )}
-
                       {project.link && project.link !== '#' ? (
                         <motion.a
                           id={`btn-visit-project-${project.id}`}
@@ -453,7 +504,7 @@ export default function WorksPage({ projects }: WorksPageProps) {
                         </motion.a>
                       ) : (
                         <span className="text-[11px] text-sky-600 font-semibold flex items-center gap-1">
-                          <span>Tap to view</span>
+                          <span>View Details</span>
                           <Maximize2 className="w-3 h-3" />
                         </span>
                       )}
@@ -489,10 +540,6 @@ export default function WorksPage({ projects }: WorksPageProps) {
         projects={filteredProjects.length > 0 ? filteredProjects : projects}
         onClose={() => setSelectedFullscreenProject(null)}
         onSelectProject={(proj) => setSelectedFullscreenProject(proj)}
-        onOpenStudio={(imgUrl) => {
-          setStudioInitialImage(imgUrl);
-          setIsStudioOpen(true);
-        }}
       />
 
       {/* Lightbox / Fullscreen Image Preview */}
@@ -526,21 +573,6 @@ export default function WorksPage({ projects }: WorksPageProps) {
           </div>
         )}
       </AnimatePresence>
-
-      {/* Interactive Creative Edit Studio Modal (Live Photo & Video App Suite) */}
-      {isStudioOpen && (
-        <ImageAdjustModal
-          isOpen={isStudioOpen}
-          imageUrl={studioInitialImage}
-          title="Creative Edit Studio (Live App)"
-          defaultAspectRatio="16:9"
-          onClose={() => setIsStudioOpen(false)}
-          onSave={(savedUrl) => {
-            setStudioInitialImage(savedUrl);
-            setIsStudioOpen(false);
-          }}
-        />
-      )}
     </div>
   );
 }
