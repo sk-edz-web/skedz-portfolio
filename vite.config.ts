@@ -64,6 +64,80 @@ function aistudioMediaPlugin(): Plugin {
 }
 // LINT.ThenChange(//depot/google3/java/com/google/alkali/boq/makersuite/applet_dev_service/templates/initializers/react_theme/vite.config.ts:aistudio_media_plugin)
 
+function ensureMainEntryExists() {
+  const root = process.cwd();
+  const srcDir = path.join(root, 'src');
+  const mainPath = path.join(srcDir, 'main.tsx');
+
+  try {
+    console.log('[BUILD-ENV] Current working directory:', root);
+    const rootFiles = fs.readdirSync(root);
+    console.log('[BUILD-ENV] Root files:', rootFiles.join(', '));
+
+    if (!fs.existsSync(srcDir)) {
+      console.log('[BUILD-ENV] "src" directory missing, creating it...');
+      fs.mkdirSync(srcDir, { recursive: true });
+    }
+
+    const srcFiles = fs.readdirSync(srcDir);
+    console.log('[BUILD-ENV] src files:', srcFiles.join(', '));
+
+    // Handle case sensitivity for main.tsx
+    const mainMatch = srcFiles.find(
+      (f) => f.toLowerCase() === 'main.tsx' || f.toLowerCase() === 'main.ts' || f.toLowerCase() === 'main.jsx'
+    );
+    if (mainMatch && mainMatch !== 'main.tsx') {
+      console.log(`[BUILD-ENV] Detected '${mainMatch}'. Syncing to 'main.tsx'...`);
+      fs.copyFileSync(path.join(srcDir, mainMatch), mainPath);
+      return;
+    }
+
+    // Check if main.tsx is in root
+    if (!fs.existsSync(mainPath)) {
+      const rootMain = rootFiles.find((f) => f.toLowerCase() === 'main.tsx' || f.toLowerCase() === 'main.ts');
+      if (rootMain) {
+        console.log(`[BUILD-ENV] Found '${rootMain}' in root. Copying to 'src/main.tsx'...`);
+        fs.copyFileSync(path.join(root, rootMain), mainPath);
+        return;
+      }
+
+      // Check if project files were cloned into a subfolder
+      for (const f of rootFiles) {
+        const subPath = path.join(root, f);
+        if (fs.statSync(subPath).isDirectory() && !['node_modules', 'dist', '.git', '.vercel'].includes(f)) {
+          const candidate = path.join(subPath, 'src', 'main.tsx');
+          if (fs.existsSync(candidate)) {
+            console.log(`[BUILD-ENV] Found entry in subfolder '${f}/src/main.tsx'. Copying...`);
+            fs.copyFileSync(candidate, mainPath);
+            return;
+          }
+        }
+      }
+
+      // If main.tsx is completely missing, generate it automatically
+      console.log('[BUILD-ENV] Generating standard src/main.tsx...');
+      const fallbackCode = `import {StrictMode} from 'react';
+import {createRoot} from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+);
+`;
+      fs.writeFileSync(mainPath, fallbackCode, 'utf-8');
+      console.log('[BUILD-ENV] src/main.tsx generated successfully.');
+    }
+  } catch (err) {
+    console.error('[BUILD-ENV] Error ensuring main entry:', err);
+  }
+}
+
+// Execute immediately during Vite config evaluation
+ensureMainEntryExists();
+
 function mainEntryResolverPlugin(): Plugin {
   return {
     name: 'vite-plugin-main-entry-resolver',
@@ -109,8 +183,6 @@ export default defineConfig(() => {
       rollupOptions: {
         input: {
           main: path.resolve(__dirname, 'index.html'),
-          admin: path.resolve(__dirname, 'admin.html'),
-          work: path.resolve(__dirname, 'work.html'),
         },
       },
     },
