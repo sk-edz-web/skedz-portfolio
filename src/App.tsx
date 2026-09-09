@@ -24,6 +24,10 @@ export default function App() {
     if (path.includes('admin') || search.includes('page=admin')) {
       return 'admin';
     }
+    // Direct card share links (?project=... or ?work=... or ?p=...)
+    if (search.includes('project=') || search.includes('work=') || search.includes('p=')) {
+      return 'works';
+    }
     if (path.includes('work') || search.includes('page=work')) {
       return 'works';
     }
@@ -38,10 +42,11 @@ export default function App() {
 
   const [activePage, setActivePage] = useState<ActivePage>(getInitialPage);
   const [hasSeenIntro, setHasSeenIntro] = useState<boolean>(() => {
-    // If user lands directly on admin, skip intro
+    // If user lands directly on admin or direct project share link, skip intro so card opens immediately
     const path = window.location.pathname.toLowerCase();
     const search = window.location.search.toLowerCase();
     if (path.includes('admin') || search.includes('page=admin')) return true;
+    if (search.includes('project=') || search.includes('work=') || search.includes('p=')) return true;
     return false;
   });
 

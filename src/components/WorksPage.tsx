@@ -1,4 +1,4 @@
-import { useState, type MouseEvent } from 'react';
+import { useState, useEffect, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Code2, 
@@ -8,12 +8,18 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Calendar, 
-  Sparkles,
-  Search,
-  Sliders
+  Sparkles, 
+  Search, 
+  Sliders,
+  Maximize2,
+  Share2,
+  Check,
+  Link2
 } from 'lucide-react';
 import { ProjectCategory, ProjectItem } from '../types';
 import ImageAdjustModal from './ImageAdjustModal';
+import ProjectFullscreenModal from './ProjectFullscreenModal';
+import { shareProjectCard, getCardShareUrl } from '../utils/share';
 
 interface WorksPageProps {
   projects: ProjectItem[];
@@ -24,8 +30,64 @@ export default function WorksPage({ projects }: WorksPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [imageIndices, setImageIndices] = useState<Record<string, number>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [selectedFullscreenProject, setSelectedFullscreenProject] = useState<ProjectItem | null>(null);
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [studioInitialImage, setStudioInitialImage] = useState<string>('https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=1200&auto=format&fit=crop&q=80');
+  const [copiedCardId, setCopiedCardId] = useState<string | null>(null);
+  const [toastNotification, setToastNotification] = useState<string | null>(null);
+
+  // Check URL query parameters for direct shared project links (?project=... or ?work=...)
+  useEffect(() => {
+    if (!projects || projects.length === 0) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const targetProjectId = params.get('project') || params.get('work') || params.get('p');
+
+    if (targetProjectId) {
+      // Find matching project by ID (case-insensitive or exact match)
+      const matched = projects.find(
+        (p) => p.id === targetProjectId || p.id.toLowerCase() === targetProjectId.toLowerCase()
+      );
+      if (matched) {
+        setSelectedFullscreenProject(matched);
+        if (activeCategory !== 'all' && matched.category !== activeCategory) {
+          setActiveCategory('all');
+        }
+      }
+    }
+  }, [projects]);
+
+  // Handle browser back/forward history for modals
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const targetId = params.get('project') || params.get('work') || params.get('p');
+      if (targetId && projects.length > 0) {
+        const found = projects.find(
+          (p) => p.id === targetId || p.id.toLowerCase() === targetId.toLowerCase()
+        );
+        setSelectedFullscreenProject(found || null);
+      } else {
+        setSelectedFullscreenProject(null);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [projects]);
+
+  // Quick card share handler
+  const handleQuickShare = async (project: ProjectItem, e: MouseEvent) => {
+    e.stopPropagation();
+    const result = await shareProjectCard(project);
+    setCopiedCardId(project.id);
+    if (result.method === 'clipboard') {
+      setToastNotification(`Link copied for "${project.title}"! Anyone opening this link lands on this card.`);
+    } else if (result.success) {
+      setToastNotification(`Opening share options for "${project.title}"...`);
+    }
+    setTimeout(() => setCopiedCardId(null), 2500);
+    setTimeout(() => setToastNotification(null), 4000);
+  };
 
   // Filter projects by category and search
   const filteredProjects = projects.filter((p) => {
@@ -204,7 +266,8 @@ export default function WorksPage({ projects }: WorksPageProps) {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: index * 0.04 }}
-                className="group relative flex flex-col rounded-2xl bg-white border border-slate-200/90 hover:border-slate-300 shadow-xs hover:shadow-md overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                onClick={() => setSelectedFullscreenProject(project)}
+                className="group relative flex flex-col rounded-2xl bg-white border border-slate-200/90 hover:border-sky-300 shadow-xs hover:shadow-lg overflow-hidden transition-all duration-300 hover:-translate-y-1 cursor-pointer select-none"
               >
                 {/* Media Header / Image Carousel */}
                 <div className="relative aspect-video w-full bg-slate-100 overflow-hidden select-none border-b border-slate-100">
@@ -213,8 +276,7 @@ export default function WorksPage({ projects }: WorksPageProps) {
                       <img
                         src={activeImage}
                         alt={project.title}
-                        onClick={() => setPreviewImage(activeImage)}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-103 cursor-pointer"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
 
                       {/* Image navigation controls if multiple images exist */}
@@ -223,7 +285,7 @@ export default function WorksPage({ projects }: WorksPageProps) {
                           <button
                             id={`btn-prev-img-${project.id}`}
                             onClick={(e) => handlePrevImage(project.id, images.length, e)}
-                            className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
                             aria-label="Previous image"
                           >
                             <ChevronLeft className="w-3.5 h-3.5" />
@@ -231,14 +293,14 @@ export default function WorksPage({ projects }: WorksPageProps) {
                           <button
                             id={`btn-next-img-${project.id}`}
                             onClick={(e) => handleNextImage(project.id, images.length, e)}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 hover:bg-black/90 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
                             aria-label="Next image"
                           >
                             <ChevronRight className="w-3.5 h-3.5" />
                           </button>
 
                           {/* Dots counter */}
-                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md">
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-md z-10">
                             {images.map((_, i) => (
                               <div
                                 key={i}
@@ -259,7 +321,7 @@ export default function WorksPage({ projects }: WorksPageProps) {
                   )}
 
                   {/* Category Pill Tag */}
-                  <div className="absolute top-2.5 left-2.5">
+                  <div className="absolute top-2.5 left-2.5 z-10">
                     <span
                       className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-xs ${
                         isWebCategory
@@ -272,22 +334,42 @@ export default function WorksPage({ projects }: WorksPageProps) {
                     </span>
                   </div>
 
-                  {/* Featured Badge */}
-                  {project.featured && (
-                    <div className="absolute top-2.5 right-2.5">
+                  {/* Top Right Badges: Featured + Share + Expand fullscreen cue */}
+                  <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
+                    {project.featured && (
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-xs">
                         <Sparkles className="w-2.5 h-2.5" />
                         <span>Featured</span>
                       </span>
-                    </div>
-                  )}
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={(e) => handleQuickShare(project, e)}
+                      className="p-1.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white backdrop-blur-md transition-all shadow-xs cursor-pointer"
+                      title="Share card direct link"
+                    >
+                      {copiedCardId === project.id ? (
+                        <Check className="w-3 h-3 text-emerald-400" />
+                      ) : (
+                        <Share2 className="w-3 h-3" />
+                      )}
+                    </button>
+
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white text-[10px] font-semibold backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity shadow-xs">
+                      <Maximize2 className="w-2.5 h-2.5" />
+                      <span>Fullscreen</span>
+                    </span>
+                  </div>
                 </div>
 
                 {/* Card Content */}
                 <div className="p-4 flex flex-col flex-1">
-                  <h3 className="text-base font-bold text-slate-900 mb-1.5 font-heading group-hover:text-sky-600 transition-colors line-clamp-1">
-                    {project.title}
-                  </h3>
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <h3 className="text-base font-bold text-slate-900 font-heading group-hover:text-sky-600 transition-colors line-clamp-1">
+                      {project.title}
+                    </h3>
+                  </div>
 
                   <p className="text-xs text-slate-600 mb-3 line-clamp-3 leading-relaxed flex-1">
                     {project.description}
@@ -314,11 +396,32 @@ export default function WorksPage({ projects }: WorksPageProps) {
                       <span>{new Date(project.createdAt).toLocaleDateString()}</span>
                     </span>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {/* Share Card Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => handleQuickShare(project, e)}
+                        className="px-2 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:text-sky-600 bg-slate-100 hover:bg-sky-50 border border-slate-200/80 transition-colors flex items-center gap-1 cursor-pointer"
+                        title="Copy direct share link for this card"
+                      >
+                        {copiedCardId === project.id ? (
+                          <>
+                            <Check className="w-3 h-3 text-emerald-600" />
+                            <span className="text-[10px] text-emerald-600 font-bold">Copied</span>
+                          </>
+                        ) : (
+                          <>
+                            <Share2 className="w-3 h-3" />
+                            <span className="text-[10px]">Share</span>
+                          </>
+                        )}
+                      </button>
+
                       {!isWebCategory && project.images?.[0] && (
                         <button
                           type="button"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setStudioInitialImage(project.images[0]);
                             setIsStudioOpen(true);
                           }}
@@ -336,6 +439,7 @@ export default function WorksPage({ projects }: WorksPageProps) {
                           href={project.link}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           whileHover={{ scale: 1.03 }}
                           whileTap={{ scale: 0.97 }}
                           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-colors shadow-xs ${
@@ -348,7 +452,10 @@ export default function WorksPage({ projects }: WorksPageProps) {
                           <ExternalLink className="w-3 h-3" />
                         </motion.a>
                       ) : (
-                        <span className="text-[11px] text-slate-400 italic">Direct showcase</span>
+                        <span className="text-[11px] text-sky-600 font-semibold flex items-center gap-1">
+                          <span>Tap to view</span>
+                          <Maximize2 className="w-3 h-3" />
+                        </span>
                       )}
                     </div>
                   </div>
@@ -358,6 +465,35 @@ export default function WorksPage({ projects }: WorksPageProps) {
           })}
         </div>
       )}
+
+      {/* Floating Toast Notification for Link Copying */}
+      <AnimatePresence>
+        {toastNotification && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-2xl bg-slate-900/95 text-white shadow-2xl border border-slate-700/80 backdrop-blur-md flex items-center gap-3 text-xs max-w-md w-[90vw] sm:w-auto"
+          >
+            <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+              <Check className="w-4 h-4" />
+            </div>
+            <span className="font-medium text-slate-200 leading-snug flex-1">{toastNotification}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Fullscreen Project Showcase Modal (Triggered by tapping any card) */}
+      <ProjectFullscreenModal
+        project={selectedFullscreenProject}
+        projects={filteredProjects.length > 0 ? filteredProjects : projects}
+        onClose={() => setSelectedFullscreenProject(null)}
+        onSelectProject={(proj) => setSelectedFullscreenProject(proj)}
+        onOpenStudio={(imgUrl) => {
+          setStudioInitialImage(imgUrl);
+          setIsStudioOpen(true);
+        }}
+      />
 
       {/* Lightbox / Fullscreen Image Preview */}
       <AnimatePresence>

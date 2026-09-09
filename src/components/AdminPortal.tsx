@@ -37,9 +37,11 @@ import {
   PhoneCall,
   Sparkles,
   Eye,
-  Globe
+  Globe,
+  Share2
 } from 'lucide-react';
 import { ProjectCategory, ProjectItem, SiteSettings, InquiryItem } from '../types';
+import { getCardShareUrl } from '../utils/share';
 import { 
   createProject, 
   updateProject, 
@@ -51,6 +53,7 @@ import {
   markInquiryRead
 } from '../services/firebase';
 import ImageAdjustModal from './ImageAdjustModal';
+import ImgbbUploader from './ImgbbUploader';
 
 interface AdminPortalProps {
   projects: ProjectItem[];
@@ -842,6 +845,14 @@ export default function AdminPortal({
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2">
+                          <ImgbbUploader
+                            compact
+                            buttonText="Upload Avatar to ImgBB"
+                            onUploadSuccess={(url) => {
+                              setFormDataSettings((prev) => ({ ...prev, avatarUrl: url }));
+                              showToast('Avatar uploaded to ImgBB CDN! Click "Save All Settings".');
+                            }}
+                          />
                           <button
                             type="button"
                             onClick={() => avatarFileInputRef.current?.click()}
@@ -856,7 +867,7 @@ export default function AdminPortal({
                             className="px-3.5 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 hover:bg-sky-500/20 text-xs font-semibold text-sky-400 flex items-center gap-1.5 transition-colors cursor-pointer"
                           >
                             <Crop className="w-3.5 h-3.5" />
-                            <span>Crop & Adjust Avatar (with Zoom)</span>
+                            <span>Crop & Adjust Avatar</span>
                           </button>
                           <button
                             type="button"
@@ -1505,11 +1516,24 @@ export default function AdminPortal({
                 <label className="block text-xs font-semibold text-slate-300 mb-2">
                   Project Images (Multiple images supported)
                 </label>
-                
+
+                {/* ImgBB Direct Cloud Upload */}
+                <div className="mb-4">
+                  <ImgbbUploader
+                    label="Upload Project Images to ImgBB (Direct Cloud CDN)"
+                    buttonText="Upload Images to ImgBB"
+                    multiple={true}
+                    onUploadSuccess={(url) => {
+                      setUploadImages((prev) => [...prev, url]);
+                      showToast('Image uploaded to ImgBB and added to card!');
+                    }}
+                  />
+                </div>
+
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mb-4">
                   <input
                     type="url"
-                    placeholder="Add image URL..."
+                    placeholder="Or paste direct image URL..."
                     value={newImageUrl}
                     onChange={(e) => setNewImageUrl(e.target.value)}
                     className="flex-1 px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:border-sky-500 focus:outline-none"
@@ -1522,15 +1546,6 @@ export default function AdminPortal({
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add URL</span>
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 hover:bg-sky-500/20 text-sky-400 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <ImageIcon className="w-3.5 h-3.5" />
-                    <span>Upload Local File</span>
-                  </button>
-
                   <button
                     type="button"
                     onClick={() => adjustUploadFileInputRef.current?.click()}
@@ -1752,6 +1767,17 @@ export default function AdminPortal({
 
                       {/* Actions */}
                       <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                        <button
+                          onClick={() => {
+                            const url = getCardShareUrl(project.id);
+                            navigator.clipboard.writeText(url);
+                            showToast(`Share link copied for "${project.title}"! Anyone with this link opens this card.`);
+                          }}
+                          className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-sky-400 transition-colors"
+                          title="Copy Direct Card Share Link"
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => setEditingProject(project)}
                           className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
@@ -2125,6 +2151,57 @@ export default function AdminPortal({
                     }
                     className="w-full px-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm"
                   />
+                </div>
+
+                {/* Card Images Management with ImgBB */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-xs font-semibold text-slate-300">
+                      Card Images ({editingProject.images?.length || 0})
+                    </label>
+                    <ImgbbUploader
+                      compact
+                      buttonText="Upload to ImgBB"
+                      multiple={true}
+                      onUploadSuccess={(url) => {
+                        setEditingProject({
+                          ...editingProject,
+                          images: [...(editingProject.images || []), url],
+                        });
+                        showToast('New image added via ImgBB!');
+                      }}
+                    />
+                  </div>
+
+                  {editingProject.images && editingProject.images.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                      {editingProject.images.map((img, idx) => (
+                        <div
+                          key={idx}
+                          className="group relative aspect-video rounded-lg overflow-hidden bg-slate-950 border border-slate-800"
+                        >
+                          <img src={img} alt={`card-img-${idx}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingProject({
+                                ...editingProject,
+                                images: editingProject.images.filter((_, i) => i !== idx),
+                              });
+                            }}
+                            className="absolute top-1 right-1 p-1 rounded-full bg-rose-600 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-rose-500"
+                            title="Remove image"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl border border-dashed border-slate-800 text-center text-[11px] text-slate-500">
+                      No images for this project. Use the "Upload to ImgBB" button above to add media.
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-4 border-t border-slate-800 flex justify-end gap-2">

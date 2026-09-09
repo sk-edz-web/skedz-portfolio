@@ -20,8 +20,11 @@ import {
   Upload,
   Contrast,
   Palette,
-  Camera
+  Camera,
+  UploadCloud,
+  Loader2
 } from 'lucide-react';
+import { uploadToImgBB } from '../services/imgbb';
 
 export interface ImageAdjustModalProps {
   isOpen: boolean;
@@ -411,18 +414,17 @@ export default function ImageAdjustModal({
     (aspectRatio === 'free' || aspectRatio === defaultAspectRatio);
 
   // High-Resolution Export
-  const handleSaveAndApply = () => {
+  const [isUploadingToImgBB, setIsUploadingToImgBB] = useState(false);
+
+  const generateExportDataUrl = (): string | null => {
     const img = imageObjRef.current;
     if (!img) {
-      onClose();
-      return;
+      return currentImageSrc || null;
     }
 
     // Zero-change bypass: returns original image without any compression
     if (hasZeroChanges && currentImageSrc === initialImageUrl) {
-      onSave(initialImageUrl);
-      onClose();
-      return;
+      return initialImageUrl;
     }
 
     const exportCanvas = document.createElement('canvas');
@@ -454,9 +456,7 @@ export default function ImageAdjustModal({
     const eCtx = exportCanvas.getContext('2d');
 
     if (!eCtx) {
-      onSave(currentImageSrc);
-      onClose();
-      return;
+      return currentImageSrc || null;
     }
 
     // Apply color filter string
@@ -539,9 +539,35 @@ export default function ImageAdjustModal({
       eCtx.restore();
     }
 
-    const dataUrl = exportCanvas.toDataURL('image/jpeg', 0.94);
-    onSave(dataUrl);
-    onClose();
+    return exportCanvas.toDataURL('image/jpeg', 0.94);
+  };
+
+  const handleSaveAndApply = () => {
+    const dataUrl = generateExportDataUrl();
+    if (dataUrl) {
+      onSave(dataUrl);
+      onClose();
+    } else {
+      onClose();
+    }
+  };
+
+  const handleExportToImgBB = async () => {
+    const dataUrl = generateExportDataUrl();
+    if (!dataUrl) return;
+
+    setIsUploadingToImgBB(true);
+    try {
+      const res = await uploadToImgBB(dataUrl);
+      const url = res.displayUrl || res.url;
+      onSave(url);
+      onClose();
+    } catch (err: any) {
+      console.error('ImgBB export error:', err);
+      alert('ImgBB upload error: ' + (err.message || 'Failed to upload'));
+    } finally {
+      setIsUploadingToImgBB(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -1127,13 +1153,33 @@ export default function ImageAdjustModal({
               </div>
 
               {/* Bottom Action Drawer / Export Button */}
-              <div className="p-4 border-t border-slate-800 bg-[#0b0f19] flex items-center justify-between gap-3">
+              <div className="p-4 border-t border-slate-800 bg-[#0b0f19] flex items-center justify-between gap-2.5">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors"
+                  className="px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-slate-800/80 transition-colors"
                 >
                   Cancel
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isUploadingToImgBB}
+                  onClick={handleExportToImgBB}
+                  className="py-2.5 px-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 text-emerald-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                  title="Upload adjusted image directly to ImgBB Cloud"
+                >
+                  {isUploadingToImgBB ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-400" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="w-3.5 h-3.5" />
+                      <span>Upload to ImgBB</span>
+                    </>
+                  )}
                 </button>
 
                 <button
@@ -1143,7 +1189,7 @@ export default function ImageAdjustModal({
                   className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-sky-500/20 flex items-center justify-center gap-1.5 transition-all"
                 >
                   <Check className="w-4 h-4" />
-                  <span>Save & Apply Edit</span>
+                  <span>Save & Apply</span>
                 </button>
               </div>
             </div>
