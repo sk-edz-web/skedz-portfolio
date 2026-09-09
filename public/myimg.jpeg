@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#1e1b4b" />
+      <stop offset="100%" stop-color="#090d16" />
+    </linearGradient>
+    <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <circle cx="300" cy="270" r="210" fill="url(#glow)"/>
+
+  <!-- Character Silhouette based on photo with curly hair and sport jersey aesthetic -->
+  <g filter="url(#shadow)">
+    <!-- Curly Hair Back -->
+    <path d="M190 230 C160 170 210 110 260 105 C290 85 330 90 360 100 C410 95 445 135 435 185 C455 210 440 250 425 270 C390 280 395 240 375 220 C340 215 330 190 300 200 C270 205 240 220 220 250 Z" fill="#18181b"/>
+    <!-- Body/Jersey with Crown / Crest -->
+    <path d="M150 560 C150 430 200 370 260 350 L340 350 C400 370 450 430 450 560 Z" fill="#111827"/>
+    <!-- Jersey Collar -->
+    <path d="M260 350 Q300 385 340 350 Q300 405 260 350 Z" fill="#1f2937"/>
+    <!-- Jersey Crest Motif -->
+    <path d="M280 430 L300 400 L320 430 L315 455 L285 455 Z" fill="#f43f5e" opacity="0.9"/>
+    <path d="M275 465 L325 465 L325 480 L275 480 Z" fill="#f43f5e" opacity="0.9"/>
+    <!-- Arms and Hand covering face pose -->
+    <path d="M265 240 Q300 320 335 240 Q300 340 265 240 Z" fill="#3f3f46" opacity="0.2"/>
+    <!-- Hand raised -->
+    <path d="M280 210 C270 170 310 160 320 195 C330 165 355 180 345 210 C360 190 375 210 365 235 C350 270 320 310 290 310 C265 300 270 240 280 210 Z" fill="#9a3412" opacity="0.85"/>
+  </g>
+
+  <!-- Developer & Editor Emblems Overlay -->
+  <g transform="translate(50, 510)">
+    <rect width="180" height="42" rx="21" fill="#1e293b" fill-opacity="0.8" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="90" y="26" fill="#38bdf8" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="14" text-anchor="middle" letter-spacing="1.5">&lt;DEVELOPER /&gt;</text>
+  </g>
+  <g transform="translate(370, 510)">
+    <rect width="180" height="42" rx="21" fill="#1e293b" fill-opacity="0.8" stroke="#c084fc" stroke-width="1.5"/>
+    <text x="90" y="26" fill="#c084fc" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="14" text-anchor="middle" letter-spacing="1.5">🎬 EDITOR</text>
+  </g>
+</svg>
