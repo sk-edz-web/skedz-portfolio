@@ -1,29 +1,10 @@
 {
-  "version": 2,
+  "buildCommand": "vite build",
+  "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    },
-    {
-      "source": "/raw-site/(.*)",
-      "destination": "/api"
-    },
-    {
-      "source": "/admin",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/admin.html",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/portal-data.json",
-      "destination": "/portal-data.json"
-    },
-    {
-      "source": "/((?!api/|raw-site/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
