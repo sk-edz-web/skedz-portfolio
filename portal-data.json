@@ -1,0 +1,308 @@
+{
+  "cards": [
+    {
+      "id": "card-1789837822899",
+      "title": "Sk secure chat",
+      "subtitle": "secure chatting app",
+      "category": "web",
+      "description": "secure chatting app like WhatsApp no ads full free and 100 private and secure 24/7 support available",
+      "thumbnail": "/uploads/skedz-1789837755430-rtyy0k-screenshot_2026-09-19_221701_p.png",
+      "images": [
+        "/uploads/skedz-1789837755430-rtyy0k-screenshot_2026-09-19_221701_p.png",
+        "/uploads/skedz-1789837755649-stq1r0-screenshot_2026-09-19_221915_p.png"
+      ],
+      "linkType": "external",
+      "internalSiteSlug": "",
+      "linkUrl": "https://skedz-chat.vercel.app/",
+      "tags": [
+        "web-website-chat-chatting"
+      ],
+      "featured": true,
+      "order": 1,
+      "createdAt": "2026-09-19T17:10:22.899Z",
+      "updatedAt": "2026-09-19T17:10:22.899Z"
+    }
+  ],
+  "socials": [
+    {
+      "id": "soc-1",
+      "platform": "Instagram",
+      "handle": "skedz.dev",
+      "url": "https://instagram.com/skedz.dev",
+      "iconName": "Instagram",
+      "likes": 0,
+      "color": "from-pink-500 to-purple-600",
+      "order": 1
+    },
+    {
+      "id": "soc-2",
+      "platform": "YouTube",
+      "handle": "SKEDZ Official",
+      "url": "https://youtube.com/@skedzdev",
+      "iconName": "Youtube",
+      "likes": 0,
+      "color": "from-red-600 to-rose-700",
+      "order": 2
+    },
+    {
+      "id": "soc-3",
+      "platform": "WhatsApp",
+      "handle": "+91 9345306572",
+      "url": "https://wa.me/919345306572?text=Hello%20SKEDZ%2C%20I%20would%20like%20to%20collaborate%20on%20a%20project",
+      "iconName": "MessageCircle",
+      "likes": 0,
+      "color": "from-emerald-500 to-teal-600",
+      "order": 3
+    },
+    {
+      "id": "soc-4",
+      "platform": "Email Direct",
+      "handle": "skedz.contact@gmail.com",
+      "url": "mailto:skedz.contact@gmail.com",
+      "iconName": "Mail",
+      "likes": 0,
+      "color": "from-blue-500 to-indigo-600",
+      "order": 4
+    }
+  ],
+  "sites": [
+    {
+      "id": "site-1789902919026",
+      "slug": "demo-fullstack",
+      "title": "Demo Fullstack Web",
+      "description": "Multi-file test with HTML, CSS, and JSON API",
+      "customHtml": "<!DOCTYPE html><html><head><title>Demo Fullstack App</title><link rel=\"stylesheet\" href=\"style.css\"></head><body style=\"background:#050814;color:#fff;font-family:sans-serif;padding:30px;\"><h1>Demo Fullstack Sub-site Live</h1><p>Running on SKEDZ Portal with multi-file support!</p><div id=\"api-data\">Loading api...</div><script src=\"app.js\"></script></body></html>",
+      "customCss": "h1 { color: #a855f7; } p { color: #94a3b8; }",
+      "files": [
+        {
+          "name": "index.html",
+          "path": "index.html",
+          "content": "<!DOCTYPE html><html><head><title>Demo Fullstack App</title><link rel=\"stylesheet\" href=\"style.css\"></head><body style=\"background:#050814;color:#fff;font-family:sans-serif;padding:30px;\"><h1>Demo Fullstack Sub-site Live</h1><p>Running on SKEDZ Portal with multi-file support!</p><div id=\"api-data\">Loading api...</div><script src=\"app.js\"></script></body></html>",
+          "contentType": "text/html",
+          "size": 363,
+          "isBinary": false
+        },
+        {
+          "name": "style.css",
+          "path": "style.css",
+          "content": "h1 { color: #a855f7; } p { color: #94a3b8; }",
+          "contentType": "text/css",
+          "size": 44,
+          "isBinary": false
+        },
+        {
+          "name": "app.js",
+          "path": "app.js",
+          "content": "fetch(\"/demo-fullstack/api/status.json\").then(r=>r.json()).then(d=>{document.getElementById(\"api-data\").innerText=\"API status: \"+d.status+\", users: \"+d.count;}).catch(e=>{document.getElementById(\"api-data\").innerText=\"API ready\";});",
+          "contentType": "application/javascript",
+          "size": 232,
+          "isBinary": false
+        },
+        {
+          "name": "status.json",
+          "path": "api/status.json",
+          "content": "{\"status\":\"healthy\",\"count\":42,\"framework\":\"SKEDZ-Core\"}",
+          "contentType": "application/json",
+          "size": 56,
+          "isBinary": false
+        }
+      ],
+      "entryFile": "index.html",
+      "projectType": "fullstack",
+      "fileName": "index.html",
+      "fileSize": 695,
+      "author": "skedz5023",
+      "createdAt": "2026-09-20T11:15:19.026Z",
+      "updatedAt": "2026-09-20T11:15:19.026Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "audit-1789902912119",
+      "ip": "127.0.0.1",
+      "device": "Unknown Browser on Unknown OS (Desktop)",
+      "userAgent": "curl/7.88.1",
+      "browser": "Unknown Browser",
+      "os": "Unknown OS",
+      "timestamp": "2026-09-20T11:15:12.119Z",
+      "status": "SUCCESS",
+      "usernameAttempted": "skedz5023"
+    },
+    {
+      "id": "audit-1789902901463",
+      "ip": "127.0.0.1",
+      "device": "Unknown Browser on Unknown OS (Desktop)",
+      "userAgent": "curl/7.88.1",
+      "browser": "Unknown Browser",
+      "os": "Unknown OS",
+      "timestamp": "2026-09-20T11:15:01.463Z",
+      "status": "FAILED",
+      "usernameAttempted": "skedz"
+    },
+    {
+      "id": "audit-1789902899229",
+      "ip": "127.0.0.1",
+      "device": "Unknown Browser on Unknown OS (Desktop)",
+      "userAgent": "curl/7.88.1",
+      "browser": "Unknown Browser",
+      "os": "Unknown OS",
+      "timestamp": "2026-09-20T11:14:59.229Z",
+      "status": "FAILED",
+      "usernameAttempted": "skedz"
+    },
+    {
+      "id": "audit-1789900477023",
+      "ip": "2405:201:e021:82ae:e56e:b073:e471:47bd",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-20T10:34:37.023Z",
+      "status": "SUCCESS",
+      "usernameAttempted": "skedz5023"
+    },
+    {
+      "id": "audit-1789837622822",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-19T17:07:02.822Z",
+      "status": "SUCCESS",
+      "usernameAttempted": "skedz5023"
+    },
+    {
+      "id": "audit-1789763498718",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-18T20:31:38.718Z",
+      "status": "SUCCESS",
+      "usernameAttempted": "skedz5023"
+    },
+    {
+      "id": "audit-1789763486493",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-18T20:31:26.493Z",
+      "status": "FAILED",
+      "usernameAttempted": "skedz5023"
+    },
+    {
+      "id": "audit-1789763480897",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-18T20:31:20.897Z",
+      "status": "FAILED",
+      "usernameAttempted": "skedz5023"
+    },
+    {
+      "id": "audit-1789761255413",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-18T19:54:15.413Z",
+      "status": "BLOCKED",
+      "usernameAttempted": "ffs"
+    },
+    {
+      "id": "audit-1789761254743",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-18T19:54:14.743Z",
+      "status": "FAILED",
+      "usernameAttempted": "ffs"
+    },
+    {
+      "id": "audit-1789761253986",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-18T19:54:13.986Z",
+      "status": "FAILED",
+      "usernameAttempted": "ffs"
+    },
+    {
+      "id": "audit-1789761253126",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-18T19:54:13.126Z",
+      "status": "FAILED",
+      "usernameAttempted": "ffs"
+    },
+    {
+      "id": "audit-1789761249435",
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "browser": "Chrome",
+      "os": "Windows",
+      "timestamp": "2026-09-18T19:54:09.435Z",
+      "status": "FAILED",
+      "usernameAttempted": "f"
+    }
+  ],
+  "blockedIps": {},
+  "inquiries": [],
+  "firebaseConfig": {
+    "apiKey": "AIzaSyAzUvLvppvUz_-cpV6Tlm5euOIR5SmPRvE",
+    "authDomain": "skedz-main.firebaseapp.com",
+    "databaseURL": "https://skedz-main-default-rtdb.firebaseio.com",
+    "projectId": "skedz-main",
+    "storageBucket": "skedz-main.firebasestorage.app",
+    "messagingSenderId": "713713653066",
+    "appId": "1:713713653066:web:dead8b3b10638d7a22ddb3",
+    "measurementId": "G-GRNW1VX6GL"
+  },
+  "cloudinaryConfig": {
+    "cloudName": "dntcjdw7r",
+    "keyName": "upload"
+  },
+  "lastUpdated": 1789902919026,
+  "reviews": [],
+  "adminSessions": {
+    "skedz-adm-1789837622823-mx578qlc3tqfnx5wmkgflm": {
+      "username": "skedz5023",
+      "createdAt": 1789837622823,
+      "expiresAt": 1791047222823,
+      "ip": "2405:201:e021:82ae:89bd:d2ee:5801:4e18",
+      "device": "Chrome on Windows (Desktop)"
+    },
+    "skedz-adm-1789900477024-ukitzug9uhpzkli9olgdk": {
+      "username": "skedz5023",
+      "createdAt": 1789900477024,
+      "expiresAt": 1791110077024,
+      "ip": "2405:201:e021:82ae:e56e:b073:e471:47bd",
+      "device": "Chrome on Windows (Desktop)"
+    },
+    "skedz-adm-1789902912119-83kgrnpy67n01axy90xjild": {
+      "username": "skedz5023",
+      "createdAt": 1789902912120,
+      "expiresAt": 1791112512120,
+      "ip": "127.0.0.1",
+      "device": "Unknown Browser on Unknown OS (Desktop)"
+    }
+  },
+  "apiKeys": {
+    "imgbb": "d52834a6dd5b38108a1abaf081dec54d"
+  }
+}

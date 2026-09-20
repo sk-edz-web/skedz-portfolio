@@ -1,6 +1,6 @@
 {
-  "name": "Sarathi Portfolio",
-  "description": "Portfolio of Sarathi - Web Developer and Freelance Editor with interactive showcases, smooth transitions, and real-time Firebase integration.",
+  "name": "SKEDZ – Video Editing & Web Development Startup",
+  "description": "SKEDZ (Sarathi) official digital studio and portal. High-impact cinematic video editing, YouTube production, and modern full-stack web development startup.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

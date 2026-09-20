@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <radialGradient id="cosmicGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1e1035" />
+      <stop offset="40%" stop-color="#0f0720" />
+      <stop offset="85%" stop-color="#050712" />
+      <stop offset="100%" stop-color="#02040a" />
+    </radialGradient>
+
+    <radialGradient id="purpleSplatter" cx="40%" cy="30%" r="55%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.9" />
+      <stop offset="45%" stop-color="#7e22ce" stop-opacity="0.6" />
+      <stop offset="80%" stop-color="#4c1d95" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#2e1065" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="cyanSplatter" cx="65%" cy="70%" r="45%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#06b6d4" stop-opacity="0.4" />
+      <stop offset="85%" stop-color="#0891b2" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="shadowFilter" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.8" />
+    </filter>
+
+    <filter id="neonPurpleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Dark Cosmic Canvas Base -->
+  <rect width="512" height="512" rx="64" fill="url(#cosmicGlow)" />
+
+  <!-- Grunge & Splatters Background Layer -->
+  <g opacity="0.85">
+    <!-- Top & Left Purple Splash Shapes -->
+    <path d="M 20 40 Q 90 10 160 50 Q 230 20 300 70 Q 240 130 180 110 Q 110 160 50 120 Z" fill="#9333ea" opacity="0.65" />
+    <path d="M 10 120 Q 80 140 120 200 Q 60 250 10 220 Z" fill="#7e22ce" opacity="0.5" />
+    <circle cx="120" cy="90" r="14" fill="#c084fc" opacity="0.8" />
+    <circle cx="85" cy="60" r="8" fill="#e9d5ff" opacity="0.9" />
+    <circle cx="210" cy="80" r="10" fill="#a855f7" opacity="0.7" />
+    <circle cx="40" cy="180" r="6" fill="#a855f7" opacity="0.7" />
+
+    <!-- Bottom & Right Cyan Brush Splashes -->
+    <path d="M 320 420 Q 400 390 480 440 Q 460 490 380 490 Q 320 470 320 420 Z" fill="#06b6d4" opacity="0.7" />
+    <path d="M 400 350 Q 470 330 500 380 Q 450 420 390 390 Z" fill="#0891b2" opacity="0.6" />
+    <circle cx="430" cy="450" r="12" fill="#67e8f9" opacity="0.8" />
+    <circle cx="470" cy="410" r="7" fill="#a5f3fc" opacity="0.9" />
+    <circle cx="360" cy="465" r="9" fill="#22d3ee" opacity="0.75" />
+  </g>
+
+  <!-- Creator Figure Silhouette in Navy Hoodie -->
+  <g id="creator" filter="url(#shadowFilter)">
+    <!-- Shoulders & Hoodie Body -->
+    <path d="M 120 480 C 130 360, 180 300, 256 295 C 332 300, 382 360, 392 480 Z" fill="#0c1329" stroke="#1e293b" stroke-width="3" />
+    
+    <!-- Red/White Anime Cloud Crest on Chest -->
+    <g transform="translate(265, 340) scale(0.65)">
+      <path d="M 10 20 C 5 10 20 0 35 8 C 45 -2 65 0 70 12 C 85 10 95 25 85 38 C 95 48 85 62 70 60 C 60 70 40 68 35 58 C 20 65 5 55 10 40 C 0 35 0 25 10 20 Z" 
+            fill="#ef4444" stroke="#ffffff" stroke-width="4" />
+      <path d="M 18 24 C 25 18 35 22 40 26 C 48 20 60 22 62 30" 
+            fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+    </g>
+
+    <!-- Hoodie Neck & Strings -->
+    <path d="M 215 300 Q 256 345 297 300" fill="#070b18" stroke="#334155" stroke-width="2" />
+    <path d="M 240 315 L 236 370" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" />
+    <path d="M 272 315 L 276 368" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Head & Neck -->
+    <path d="M 230 280 L 230 310 L 282 310 L 282 280 Z" fill="#c28b6d" />
+    <ellipse cx="256" cy="245" rx="44" ry="52" fill="#d49b7d" />
+
+    <!-- Stylish Transparent Glasses -->
+    <g stroke="#ffffff" stroke-width="3.5" fill="none" opacity="0.95">
+      <!-- Left Lens -->
+      <rect x="222" y="232" width="28" height="22" rx="4" fill="rgba(255,255,255,0.15)" />
+      <!-- Right Lens -->
+      <rect x="262" y="232" width="28" height="22" rx="4" fill="rgba(255,255,255,0.15)" />
+      <!-- Bridge -->
+      <line x1="250" y1="242" x2="262" y2="242" />
+      <!-- Left Temple -->
+      <line x1="222" y1="240" x2="212" y2="238" />
+      <!-- Right Temple -->
+      <line x1="290" y1="240" x2="300" y2="238" />
+    </g>
+
+    <!-- Stylized Wavy Messy Dark Hair -->
+    <path d="M 205 240 C 195 200, 210 160, 245 155 C 280 150, 315 170, 315 210 C 325 215, 320 240, 310 245 C 305 220, 290 190, 260 195 C 230 200, 220 220, 205 240 Z" fill="#090d16" />
+    <!-- Hair Strands & Volume -->
+    <path d="M 225 180 C 240 145, 275 140, 295 165 C 285 160, 260 165, 250 175 Z" fill="#1e293b" />
+    <path d="M 215 205 C 205 185, 225 170, 240 180 Z" fill="#0f172a" />
+    <path d="M 270 165 C 295 155, 315 175, 305 195 Z" fill="#1e293b" />
+
+    <!-- Hand near Face/Glasses -->
+    <path d="M 230 295 C 220 270, 235 245, 245 245 C 252 245, 258 260, 255 285 Z" fill="#d49b7d" stroke="#1e293b" stroke-width="1.5" />
+    <!-- Beaded Bracelet on Wrist -->
+    <g transform="translate(210, 300)">
+      <circle cx="5" cy="5" r="4" fill="#78350f" />
+      <circle cx="12" cy="7" r="4" fill="#92400e" />
+      <circle cx="19" cy="9" r="4" fill="#b45309" />
+      <circle cx="26" cy="11" r="4" fill="#78350f" />
+    </g>
+  </g>
+
+  <!-- RIPPED TORN WHITE PAPER BANNER WITH THICK BLACK BORDER (Iconic center strip) -->
+  <g id="torn-paper-banner" transform="rotate(-6, 256, 275)" filter="url(#shadowFilter)">
+    <!-- Black Underlay / Shadow Border for Torn Effect -->
+    <path d="M -20 222 
+             L 20 228 L 50 220 L 90 226 L 130 219 L 170 225 L 210 218 L 260 224 L 310 218 L 360 225 L 410 219 L 460 226 L 500 221 L 535 226
+             L 535 342
+             L 490 336 L 450 344 L 400 338 L 350 345 L 300 337 L 250 344 L 200 338 L 150 345 L 100 337 L 50 343 L 10 338 L -20 342 Z"
+          fill="#000000" />
+
+    <!-- White Torn Paper Body -->
+    <path d="M -15 228 
+             L 25 233 L 55 226 L 95 231 L 135 225 L 175 230 L 215 224 L 265 229 L 315 224 L 365 230 L 415 225 L 465 231 L 505 227 L 530 231
+             L 530 336
+             L 485 331 L 445 338 L 395 333 L 345 339 L 295 332 L 245 338 L 195 333 L 145 339 L 95 332 L 45 338 L 5 333 L -15 336 Z"
+          fill="#ffffff" />
+
+    <!-- DYNAMIC BOLD GRAFFITI TEXT: S K E D Z -->
+    <!-- S -->
+    <text x="35" y="312" font-family="'Syne', 'Outfit', sans-serif" font-size="108" font-weight="900" fill="#ffffff" stroke="#000000" stroke-width="14" stroke-linejoin="round" paint-order="stroke fill">S</text>
+    <!-- K -->
+    <text x="120" y="312" font-family="'Syne', 'Outfit', sans-serif" font-size="108" font-weight="900" fill="#ffffff" stroke="#000000" stroke-width="14" stroke-linejoin="round" paint-order="stroke fill">K</text>
+    <!-- E -->
+    <text x="222" y="312" font-family="'Syne', 'Outfit', sans-serif" font-size="108" font-weight="900" fill="#ffffff" stroke="#000000" stroke-width="14" stroke-linejoin="round" paint-order="stroke fill">E</text>
+    <!-- D -->
+    <text x="312" y="312" font-family="'Syne', 'Outfit', sans-serif" font-size="108" font-weight="900" fill="#ffffff" stroke="#000000" stroke-width="14" stroke-linejoin="round" paint-order="stroke fill">D</text>
+    <!-- Z -->
+    <text x="408" y="312" font-family="'Syne', 'Outfit', sans-serif" font-size="108" font-weight="900" fill="#ffffff" stroke="#000000" stroke-width="14" stroke-linejoin="round" paint-order="stroke fill">Z</text>
+  </g>
+
+  <!-- Accent Neon Splashes Over Border -->
+  <path d="M 40 450 L 140 435 L 120 465 L 50 475 Z" fill="#06b6d4" opacity="0.9" />
+  <circle cx="150" cy="445" r="5" fill="#22d3ee" />
+  <circle cx="170" cy="460" r="3" fill="#67e8f9" />
+
+  <path d="M 410 80 L 480 65 L 460 100 Z" fill="#a855f7" opacity="0.85" />
+  <circle cx="390" cy="85" r="4" fill="#c084fc" />
+</svg>
